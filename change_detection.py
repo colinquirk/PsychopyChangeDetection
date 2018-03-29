@@ -21,10 +21,9 @@ percent_same = .5  # between 0 and 1
 set_sizes = [6]
 stim_size = 1.5  # visual degrees, used for X and Y
 
-
 single_probe = True  # False to display all stimuli at test
-repeat_stim_colors = True  # False to make all stimuli colors unique
-repeat_test_colors = True  # False to make test colors unique from stim colors
+repeat_stim_colors = False  # False to make all stimuli colors unique
+repeat_test_colors = False  # False to make test colors unique from stim colors
 
 keys = ['s', 'd']  # first is same
 distance_to_monitor = 90
@@ -221,7 +220,8 @@ class Ktask(template.BaseExperiment):
             while test_color == self.colors[test_location]:
                 test_color = random.choice(self.colors)
         else:
-            test_color = random.choice(list(set(self.colors) - set(stim_colors)))
+            test_color = random.choice(
+                [color for color in self.colors if color not in stim_colors])
 
         if self.max_per_quad is not None:
             # quad boundries (x1, x2, y1, y2)
@@ -310,11 +310,18 @@ class Ktask(template.BaseExperiment):
         psychopy.visual.TextStim(
             self.experiment_window, text='+', color=[-1, -1, -1]).draw()
 
-        for pos, color in itertools.izip(coordinates, colors):
+        if self.single_probe:
             psychopy.visual.Rect(
                 self.experiment_window, width=self.stim_size,
-                height=self.stim_size, pos=pos, fillColor=color,
-                units='deg').draw()
+                height=self.stim_size, pos=coordinates[test_loc],
+                fillColor=colors[test_loc], units='deg').draw()
+
+        else:
+            for pos, color in itertools.izip(coordinates, colors):
+                psychopy.visual.Rect(
+                    self.experiment_window, width=self.stim_size,
+                    height=self.stim_size, pos=pos, fillColor=color,
+                    units='deg').draw()
 
         # Draw over the test color on diff trials
         if condition == 'diff':
