@@ -273,6 +273,14 @@ class Ktask(template.BaseExperiment):
         return trial_list
 
     def _make_grid(self):
+        """A private method that creates a grid of possible locations. A helper function for
+            self.generate_locations.
+
+        Returns a list of possible locations.
+
+        Parameters:
+        set_size -- The number of stimuli for this trial.
+        """
         grid_dist = self.min_distance * 2
         grid_jitter = random.uniform(0, grid_dist)
         num_lines = int(math.floor(1 / (grid_dist)))
@@ -293,6 +301,13 @@ class Ktask(template.BaseExperiment):
         return grid
 
     def generate_locations(self, set_size):
+        """Creates the locations for a trial. A helper function for self.make_trial.
+
+        Returns a list of acceptable locations.
+
+        Parameters:
+        set_size -- The number of stimuli for this trial.
+        """
         if self.max_per_quad is not None:
             # quad boundries (x1, x2, y1, y2)
             quad_count = [0, 0, 0, 0]
@@ -451,7 +466,9 @@ class Ktask(template.BaseExperiment):
         psychopy.core.wait(self.sample_time)
 
     def get_response(self):
-        """DWaits for a response from the participant. A helper function for self.run_trial.
+        """Waits for a response from the participant. A helper function for self.run_trial.
+
+        Pressing Q while the function is wait for a response will quit the experiment.
 
         Returns the pressed key and the reaction time.
         """
