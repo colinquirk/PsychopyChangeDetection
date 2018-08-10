@@ -60,15 +60,15 @@ min_distance = 0.1
 max_per_quad = 2  # int or None for totally random displays
 
 colors = [
-    [ 1, -1, -1],
+    [1, -1, -1],
     [-1,  1, -1],
     [-1, -1,  1],
-    [ 1,  1, -1],
-    [ 1, -1,  1],
+    [1,  1, -1],
+    [1, -1,  1],
     [-1,  1,  1],
-    [ 1,  1,  1],
+    [1,  1,  1],
     [-1, -1, -1],
-    [ 1,  0, -1],
+    [1,  0, -1],
 ]
 
 data_fields = [
@@ -334,7 +334,7 @@ class Ktask(template.BaseExperiment):
 
         psychopy.core.wait(self.sample_time)
 
-    def get_response(self, ):
+    def get_response(self):
         rt_timer = psychopy.core.MonotonicClock()
 
         keys = self.keys + ['q']
@@ -399,7 +399,6 @@ class Ktask(template.BaseExperiment):
             for trial_num, trial in enumerate(block):
                 self.run_trial(trial, block_num, trial_num)
 
-            self.save_experiment_pickle()
             self.save_data_to_csv()
 
             if block_num + 1 != self.number_of_blocks:
@@ -410,6 +409,7 @@ class Ktask(template.BaseExperiment):
             bg_color=[0, 0, 255], text_color=[255, 255, 255])
 
         self.quit_experiment()
+
 
 # If you call this script directly, the task will run with your defaults
 if __name__ == '__main__':
