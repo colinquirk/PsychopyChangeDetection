@@ -272,6 +272,60 @@ class Ktask(template.BaseExperiment):
 
         return trial_list
 
+    def _make_grid(self):
+        grid_dist = self.min_distance * 2
+        grid_jitter = random.uniform(0, grid_dist)
+        num_lines = int(math.floor(1 / (grid_dist)))
+        center = np.array([.5, .5])
+        grid = []
+        for x in range(num_lines):
+            for y in range(num_lines):
+                loc = [(grid_dist * x) + grid_jitter,
+                       (grid_dist * y) + grid_jitter]
+
+                dist_to_center = np.linalg.norm(np.array(loc) - center)
+                too_big = loc[0] >= 1 or loc[1] >= 1
+
+                # Add it if it's not too close to the center or outside range
+                if not dist_to_center < grid_dist and not too_big:
+                    grid.append(loc)
+
+        return grid
+
+    def generate_locations(self, set_size):
+        if self.max_per_quad is not None:
+            # quad boundries (x1, x2, y1, y2)
+            quad_count = [0, 0, 0, 0]
+
+        grid = self._make_grid()
+
+        locs = []
+        while len(locs) <= set_size:
+            grid_attempt = random.choice(grid)
+            attempt = [coord + random.uniform(-self.min_distance / 2,
+                                              self.min_distance / 2)
+                       for coord in grid_attempt]
+
+            if self.max_per_quad is not None:
+                if attempt[0] < 0.5 and attempt[1] < 0.5:
+                    quad = 0
+                elif attempt[0] >= 0.5 and attempt[1] < 0.5:
+                    quad = 1
+                elif attempt[0] < 0.5 and attempt[1] >= 0.5:
+                    quad = 2
+                else:
+                    quad = 3
+
+                if quad_count[quad] < self.max_per_quad:
+                    quad_count[quad] += 1
+                    grid.remove(grid_attempt)
+                    locs.append(attempt)
+            else:
+                grid.remove(grid_attempt)
+                locs.append(attempt)
+
+        return locs
+
     def make_trial(self, set_size, condition):
         """Creates a single trial dict. A helper function for self.make_block.
 
@@ -302,57 +356,13 @@ class Ktask(template.BaseExperiment):
             test_color = random.choice(
                 [color for color in self.colors if color not in stim_colors])
 
-        if self.max_per_quad is not None:
-            # quad boundries (x1, x2, y1, y2)
-            quad_count = [0, 0, 0, 0]
-
-        grid_dist = self.min_distance * 2
-        grid_jitter = random.uniform(0, grid_dist)
-        num_lines = int(math.floor(1 / (grid_dist)))
-        center = np.array([.5, .5])
-        grid = []
-        for x in range(num_lines):
-            for y in range(num_lines):
-                loc = [(grid_dist * x) + grid_jitter,
-                       (grid_dist * y) + grid_jitter]
-
-                dist_to_center = np.linalg.norm(np.array(loc) - center)
-                too_big = loc[0] >= 1 or loc[1] >= 1
-
-                # Add it if it's not too close to the center or outside range
-                if not dist_to_center < grid_dist and not too_big:
-                    grid.append(loc)
-
-        locs = []
-        while len(locs) <= set_size:
-            grid_attempt = random.choice(grid)
-            attempt = [coord + random.uniform(-self.min_distance / 2,
-                                              self.min_distance / 2)
-                       for coord in grid_attempt]
-
-            if self.max_per_quad is not None:
-                if attempt[0] < 0.5 and attempt[1] < 0.5:
-                    quad = 0
-                elif attempt[0] >= 0.5 and attempt[1] < 0.5:
-                    quad = 1
-                elif attempt[0] < 0.5 and attempt[1] >= 0.5:
-                    quad = 2
-                else:
-                    quad = 3
-
-                if quad_count[quad] < self.max_per_quad:
-                    quad_count[quad] += 1
-                    grid.remove(grid_attempt)
-                    locs.append(attempt)
-            else:
-                grid.remove(grid_attempt)
-                locs.append(attempt)
+        locs = self.generate_locations(set_size)
 
         trial = {
             'set_size': set_size,
             'condition': condition,
             'cresp': cresp,
-            'locations': locs,  # get rid of center now
+            'locations': locs,
             'stim_colors': stim_colors,
             'test_color': test_color,
             'test_location': test_location,
