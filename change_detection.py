@@ -1,3 +1,24 @@
+"""A basic change detection experiment.
+
+Author - Colin Quirk (cquirk@uchicago.edu)
+
+Repo: https://github.com/colinquirk/PsychopyChangeDetection
+
+This is a common working memory paradigm used to provide a measure of K (working memory capacity).
+This code can either be used before other tasks to provide a seperate measure of K or it can be
+inherited and extended. If this file is run directly the defaults at the top of the page will be
+used. To make simple changes, you can adjust any of these files. For more in depth changes you
+will need to overwrite the methods yourself.
+
+Note: this code relies on my templateexperiments module. You can get it from
+https://github.com/colinquirk/templateexperiments and either put it in the same folder as this
+code or give the path to psychopy in the preferences.
+
+Classes:
+Ktask -- The class that runs the experiment.
+    See 'print Ktask.__doc__' for simple class docs or help(Ktask) for everything.
+"""
+
 from __future__ import division
 from __future__ import print_function
 
@@ -17,7 +38,7 @@ import templateexperiments as template
 # Things you probably want to change
 number_of_trials_per_block = 10
 number_of_blocks = 2
-percent_same = .5  # between 0 and 1
+percent_same = 0.5  # between 0 and 1
 set_sizes = [6]
 stim_size = 1.5  # visual degrees, used for X and Y
 
@@ -121,7 +142,48 @@ questionaire_dict = {
 # This is the logic that runs the experiment
 # Change anything below this comment at your own risk
 class Ktask(template.BaseExperiment):
-    """
+    """The class that runs the change detection experiment.
+
+    Parameters:
+    allowed_deg_from_fix -- The maximum distance in visual degrees the stimuli can appear from
+        fixation
+    colors -- The list of colors (list of 3 values, -1 to 1) to be used in the experiment.
+    delay_time -- The number of seconds between the stimuli display and test.
+    instruct_text -- The text to be displayed to the participant at the beginning of the
+        experiment.
+    iti_time -- The number of seconds in between a response and the next trial.
+    keys -- The keys to be used for making a response. First is used for 'same' and the second is
+        used for 'different'
+    max_per_quad -- The number of stimuli allowed in each quadrant. If None, displays are
+        completely random.
+    min_distance -- The minimum distance in visual degrees between stimuli.
+    number_of_blocks -- The number of blocks in the experiment.
+    number_of_trials_per_block -- The number of trials within each block.
+    percent_same -- A float between 0 and 1 (inclusive) describing the likelihood of a trial being
+        a "same" trial.
+    repeat_stim_colors -- If True, a stimuli display can have repeated colors.
+    repeat_test_colors -- If True, on a change trial the foil color can be one of the other colors
+        from the initial display.
+    sample_time -- The number of seconds the stimuli are on the screen for.
+    set_sizes -- A list of all the set sizes. An equal number of trials will be shown for each set
+        size.
+    single_probe -- If True, the test display will show only a single probe. If False, all the
+        stimuli will be shown.
+    stim_size -- The size of the stimuli in visual angle.
+
+    Additional keyword arguments are sent to template.BaseExperiment().
+
+    Methods:
+    chdir -- Changes the directory to where the data will be saved.
+    display_break -- Displays a screen during the break between blocks.
+    display_fixation -- Displays a fixation cross.
+    display_stimuli -- Displays the stimuli.
+    display_test -- Displays the test array.
+    get_response -- Waits for a response from the participant.
+    make_block -- Creates a block of trials to be run.
+    make_trial -- Creates a single trial.
+    run_trial -- Runs a single trial.
+    run -- Runs the entire experiment.
     """
 
     def __init__(self, number_of_trials_per_block=number_of_trials_per_block,
@@ -176,6 +238,9 @@ class Ktask(template.BaseExperiment):
 
     @staticmethod
     def chdir():
+        """Static method that changes the directory to where the data will be saved.
+        """
+
         try:
             os.makedirs(data_directory)
         except OSError as e:
@@ -185,6 +250,11 @@ class Ktask(template.BaseExperiment):
         os.chdir(data_directory)
 
     def make_block(self):
+        """Makes a block of trials.
+
+        Returns a shuffled list of trials created by self.make_trial.
+        """
+
         trial_list = []
 
         self.same_trials_per_set_size
@@ -203,6 +273,15 @@ class Ktask(template.BaseExperiment):
         return trial_list
 
     def make_trial(self, set_size, condition):
+        """Creates a single trial dict. A helper function for self.make_block.
+
+        Returns the trial dict.
+
+        Parameters:
+        set_size -- The number of stimuli for this trial.
+        condition -- Whether this trial is same or different.
+        """
+
         if condition == 'same':
             cresp = self.keys[0]
         else:
@@ -282,10 +361,19 @@ class Ktask(template.BaseExperiment):
         return trial
 
     def display_break(self):
+        """Displays a break screen in between blocks.
+        """
+
         break_text = 'Please take a short break. Press space to continue.'
         self.display_text_screen(text=break_text, bg_color=[204, 255, 204])
 
     def display_fixation(self, wait_time):
+        """Displays a fixation cross. A helper function for self.run_trial.
+
+        Parameters:
+        wait_time -- The amount of time the fixation should be displayed for.
+        """
+
         psychopy.visual.TextStim(
             self.experiment_window, text='+', color=[-1, -1, -1]).draw()
         self.experiment_window.flip()
@@ -293,6 +381,14 @@ class Ktask(template.BaseExperiment):
         psychopy.core.wait(wait_time)
 
     def display_stimuli(self, coordinates, colors):
+        """Displays the stimuli. A helper function for self.run_trial.
+
+        Parameters:
+        coordinates -- A list of coordinates (list of x and y value) describing where the stimuli
+            should be displayed.
+        colors -- A list of colors describing what should be drawn at each coordinate.
+        """
+
         psychopy.visual.TextStim(
             self.experiment_window, text='+', color=[-1, -1, -1]).draw()
 
@@ -307,6 +403,16 @@ class Ktask(template.BaseExperiment):
         psychopy.core.wait(self.sample_time)
 
     def display_test(self, condition, coordinates, colors, test_loc, test_color):
+        """Displays the test array. A helper function for self.run_trial.
+
+        Parameters:
+        condition -- Whether the trial is same or different.
+        coordinates -- A list of coordinates where stimuli should be drawn.
+        colors -- The colors that should be drawn at each coordinate.
+        test_loc -- The index of the tested stimuli.
+        test_color -- The color of the tested stimuli.
+        """
+
         psychopy.visual.TextStim(
             self.experiment_window, text='+', color=[-1, -1, -1]).draw()
 
@@ -335,6 +441,11 @@ class Ktask(template.BaseExperiment):
         psychopy.core.wait(self.sample_time)
 
     def get_response(self):
+        """DWaits for a response from the participant. A helper function for self.run_trial.
+
+        Returns the pressed key and the reaction time.
+        """
+
         rt_timer = psychopy.core.MonotonicClock()
 
         keys = self.keys + ['q']
@@ -347,6 +458,14 @@ class Ktask(template.BaseExperiment):
         return resp[0][0], resp[0][1]*1000  # key and rt in milliseconds
 
     def run_trial(self, trial, block_num, trial_num):
+        """Runs a single trial.
+
+        Parameters:
+        trial -- The dictionary of information about a trial.
+        block_num -- The number of the block in the experiment.
+        trial_num -- The number of the trial within a block.
+        """
+
         coordinates = [[(num - .5) * self.allowed_deg_from_fix for num in loc]
                        for loc in trial['locations']]
 
@@ -378,6 +497,9 @@ class Ktask(template.BaseExperiment):
         }])
 
     def run(self):
+        """Runs the entire experiment if the file is run directly.
+        """
+
         self.chdir()
 
         ok = self.get_experiment_info_from_dialog(questionaire_dict)
