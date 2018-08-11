@@ -148,6 +148,7 @@ class Ktask(template.BaseExperiment):
     allowed_deg_from_fix -- The maximum distance in visual degrees the stimuli can appear from
         fixation
     colors -- The list of colors (list of 3 values, -1 to 1) to be used in the experiment.
+    data_directory -- Where the data should be saved.
     delay_time -- The number of seconds between the stimuli display and test.
     instruct_text -- The text to be displayed to the participant at the beginning of the
         experiment.
@@ -182,6 +183,7 @@ class Ktask(template.BaseExperiment):
     get_response -- Waits for a response from the participant.
     make_block -- Creates a block of trials to be run.
     make_trial -- Creates a single trial.
+    questionaire_dict -- Questions to be included in the dialog.
     run_trial -- Runs a single trial.
     run -- Runs the entire experiment.
     """
@@ -194,7 +196,7 @@ class Ktask(template.BaseExperiment):
                  instruct_text=instruct_text, single_probe=single_probe,
                  iti_time=iti_time, sample_time=sample_time,
                  delay_time=delay_time, repeat_stim_colors=repeat_stim_colors,
-                 repeat_test_colors=repeat_test_colors,
+                 repeat_test_colors=repeat_test_colors, data_directory=data_directory,
                  questionaire_dict=questionaire_dict, **kwargs):
 
         self.number_of_trials_per_block = number_of_trials_per_block
@@ -220,6 +222,7 @@ class Ktask(template.BaseExperiment):
 
         self.max_per_quad = max_per_quad
 
+        self.data_directory = data_directory
         self.instruct_text = instruct_text
         self.questionaire_dict = questionaire_dict
 
@@ -238,18 +241,17 @@ class Ktask(template.BaseExperiment):
 
         super(Ktask, self).__init__(**kwargs)
 
-    @staticmethod
-    def chdir():
-        """Static method that changes the directory to where the data will be saved.
+    def chdir(self):
+        """Changes the directory to where the data will be saved.
         """
 
         try:
-            os.makedirs(data_directory)
+            os.makedirs(self.data_directory)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
 
-        os.chdir(data_directory)
+        os.chdir(self.data_directory)
 
     def make_block(self):
         """Makes a block of trials.
@@ -319,8 +321,7 @@ class Ktask(template.BaseExperiment):
         locs = []
         while len(locs) <= set_size:
             grid_attempt = random.choice(grid)
-            attempt = [coord + random.uniform(-self.min_distance / 2,
-                                              self.min_distance / 2)
+            attempt = [coord + random.uniform(-self.min_distance / 2, self.min_distance / 2)
                        for coord in grid_attempt]
 
             if self.max_per_quad is not None:
