@@ -487,6 +487,9 @@ class Ktask(template.BaseExperiment):
 
         return resp[0][0], resp[0][1]*1000  # key and rt in milliseconds
 
+    def send_data(self, data):
+        self.update_experiment_data([data])
+
     def run_trial(self, trial, block_num, trial_num):
         """Runs a single trial.
 
@@ -510,7 +513,7 @@ class Ktask(template.BaseExperiment):
 
         acc = 1 if resp == trial['cresp'] else 0
 
-        self.update_experiment_data([{
+        data = {
             'Block': block_num,
             'Trial': trial_num,
             'Timestamp': psychopy.core.getAbsTime(),
@@ -524,13 +527,15 @@ class Ktask(template.BaseExperiment):
             'Locations': trial['locations'],
             'SampleColors': trial['stim_colors'],
             'TestColor': trial['test_color'],
-        }])
+        }
+
+        return data
 
     def run(self):
         """Runs the entire experiment if the file is run directly.
         """
 
-        self.chdir()
+        self.chdir(self)
 
         ok = self.get_experiment_info_from_dialog(self.questionaire_dict)
 
@@ -549,7 +554,8 @@ class Ktask(template.BaseExperiment):
         for block_num in range(self.number_of_blocks):
             block = self.make_block()
             for trial_num, trial in enumerate(block):
-                self.run_trial(trial, block_num, trial_num)
+                data = self.run_trial(trial, block_num, trial_num)
+                self.send_data(data)
 
             self.save_data_to_csv()
 
