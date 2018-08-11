@@ -194,7 +194,8 @@ class Ktask(template.BaseExperiment):
                  instruct_text=instruct_text, single_probe=single_probe,
                  iti_time=iti_time, sample_time=sample_time,
                  delay_time=delay_time, repeat_stim_colors=repeat_stim_colors,
-                 repeat_test_colors=repeat_test_colors, **kwargs):
+                 repeat_test_colors=repeat_test_colors,
+                 questionaire_dict=questionaire_dict, **kwargs):
 
         self.number_of_trials_per_block = number_of_trials_per_block
         self.number_of_blocks = number_of_blocks
@@ -220,6 +221,7 @@ class Ktask(template.BaseExperiment):
         self.max_per_quad = max_per_quad
 
         self.instruct_text = instruct_text
+        self.questionaire_dict = questionaire_dict
 
         self.single_probe = single_probe
         self.repeat_stim_colors = repeat_stim_colors
@@ -529,7 +531,7 @@ class Ktask(template.BaseExperiment):
 
         self.chdir()
 
-        ok = self.get_experiment_info_from_dialog(questionaire_dict)
+        ok = self.get_experiment_info_from_dialog(self.questionaire_dict)
 
         if not ok:
             print('Experiment has been terminated.')
