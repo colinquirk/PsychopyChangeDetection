@@ -526,7 +526,7 @@ class Ktask(template.BaseExperiment):
             'LocationTested': trial['test_location'],
             'Locations': trial['locations'],
             'SampleColors': trial['stim_colors'],
-            'TestColor': trial['test_color'],
+            'TestColors': trial['test_color'],
         }
 
         return data
@@ -535,7 +535,7 @@ class Ktask(template.BaseExperiment):
         """Runs the entire experiment if the file is run directly.
         """
 
-        self.chdir(self)
+        self.chdir()
 
         ok = self.get_experiment_info_from_dialog(self.questionaire_dict)
 
