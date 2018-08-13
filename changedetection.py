@@ -70,7 +70,7 @@ data_directory = os.path.join(
 exp_name = 'ChangeDetection'
 
 iti_time = 1
-sample_time = 2.25
+sample_time = 0.25
 delay_time = 1
 
 allowed_deg_from_fix = 6
