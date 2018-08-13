@@ -75,7 +75,8 @@ delay_time = 1
 
 allowed_deg_from_fix = 6
 
-# minimum euclidean distance between stimuli
+# minimum euclidean distance between centers of stimuli in visual angle
+# min_distance should be greater than stim_size
 min_distance = 2.5
 max_per_quad = 2  # int or None for totally random displays
 
