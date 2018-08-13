@@ -162,6 +162,7 @@ class Ktask(template.BaseExperiment):
     number_of_trials_per_block -- The number of trials within each block.
     percent_same -- A float between 0 and 1 (inclusive) describing the likelihood of a trial being
         a "same" trial.
+    questionaire_dict -- Questions to be included in the dialog.
     repeat_stim_colors -- If True, a stimuli display can have repeated colors.
     repeat_test_colors -- If True, on a change trial the foil color can be one of the other colors
         from the initial display.
@@ -180,10 +181,10 @@ class Ktask(template.BaseExperiment):
     display_fixation -- Displays a fixation cross.
     display_stimuli -- Displays the stimuli.
     display_test -- Displays the test array.
+    generate_locations -- Helper function that generates locations for make_trial
     get_response -- Waits for a response from the participant.
     make_block -- Creates a block of trials to be run.
     make_trial -- Creates a single trial.
-    questionaire_dict -- Questions to be included in the dialog.
     run_trial -- Runs a single trial.
     run -- Runs the entire experiment.
     """
@@ -278,6 +279,13 @@ class Ktask(template.BaseExperiment):
 
     @staticmethod
     def _which_quad(loc):
+        """Checks which quad a location is in.
+
+        This method is used by generate_locations to ensure the max_per_quad condition is followed.
+
+        Parameters:
+        loc -- A list of two values (x,y) in visual angle.
+        """
         if loc[0] < 0 and loc[1] < 0:
             return 0
         elif loc[0] >= 0 and loc[1] < 0:
@@ -288,6 +296,14 @@ class Ktask(template.BaseExperiment):
             return 3
 
     def _too_close(self, attempt, locs):
+        """Checks that an attempted location is valid.
+
+        This method is used by generate_locations to ensure the min_distance condition is followed.
+
+        Parameters:
+        attempt -- A list of two values (x,y) in visual angle.
+        locs -- A list of previous successful attempts to be checked.
+        """
         if np.linalg.norm(np.array(attempt)) < self.min_distance:
             return True  # Too close to center
 
@@ -475,10 +491,20 @@ class Ktask(template.BaseExperiment):
         return resp[0][0], resp[0][1]*1000  # key and rt in milliseconds
 
     def send_data(self, data):
+        """Updates the experiment data with the information from the last trial.
+
+        This function is seperated from run_trial to allow additional information to be added
+        afterwards.
+
+        Parameters:
+        data -- A dict where keys exist in data_fields and values are to be saved.
+        """
         self.update_experiment_data([data])
 
     def run_trial(self, trial, block_num, trial_num):
         """Runs a single trial.
+
+        Returns the data from the trial after getting a participant response.
 
         Parameters:
         trial -- The dictionary of information about a trial.
