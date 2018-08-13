@@ -26,7 +26,6 @@ import os
 import sys
 import errno
 
-import math
 import random
 import itertools
 
@@ -71,13 +70,13 @@ data_directory = os.path.join(
 exp_name = 'ChangeDetection'
 
 iti_time = 1
-sample_time = .25
+sample_time = 2.25
 delay_time = 1
 
-allowed_deg_from_fix = 15
+allowed_deg_from_fix = 6
 
-# minimum euclidean distance of stimuli in precent of allowed space
-min_distance = 0.1
+# minimum euclidean distance between stimuli
+min_distance = 2.5
 max_per_quad = 2  # int or None for totally random displays
 
 colors = [
@@ -276,33 +275,26 @@ class Ktask(template.BaseExperiment):
 
         return trial_list
 
-    def _make_grid(self):
-        """A private method that creates a grid of possible locations. A helper function for
-            self.generate_locations.
+    @staticmethod
+    def _which_quad(loc):
+        if loc[0] < 0 and loc[1] < 0:
+            return 0
+        elif loc[0] >= 0 and loc[1] < 0:
+            return 1
+        elif loc[0] < 0 and loc[1] >= 0:
+            return 2
+        else:
+            return 3
 
-        Returns a list of possible locations.
+    def _too_close(self, attempt, locs):
+        if np.linalg.norm(np.array(attempt)) < self.min_distance:
+            return True  # Too close to center
 
-        Parameters:
-        set_size -- The number of stimuli for this trial.
-        """
-        grid_dist = self.min_distance * 2
-        grid_jitter = random.uniform(0, grid_dist)
-        num_lines = int(math.floor(1 / (grid_dist)))
-        center = np.array([.5, .5])
-        grid = []
-        for x in range(num_lines):
-            for y in range(num_lines):
-                loc = [(grid_dist * x) + grid_jitter,
-                       (grid_dist * y) + grid_jitter]
+        for loc in locs:
+            if np.linalg.norm(np.array(attempt) - np.array(loc)) < self.min_distance:
+                return True  # Too close to another square
 
-                dist_to_center = np.linalg.norm(np.array(loc) - center)
-                too_big = loc[0] >= 1 or loc[1] >= 1
-
-                # Add it if it's not too close to the center or outside range
-                if not dist_to_center < grid_dist and not too_big:
-                    grid.append(loc)
-
-        return grid
+        return False
 
     def generate_locations(self, set_size):
         """Creates the locations for a trial. A helper function for self.make_trial.
@@ -316,30 +308,26 @@ class Ktask(template.BaseExperiment):
             # quad boundries (x1, x2, y1, y2)
             quad_count = [0, 0, 0, 0]
 
-        grid = self._make_grid()
-
         locs = []
-        while len(locs) <= set_size:
-            grid_attempt = random.choice(grid)
-            attempt = [coord + random.uniform(-self.min_distance / 2, self.min_distance / 2)
-                       for coord in grid_attempt]
+        counter = 0
+        while len(locs) < set_size:
+            counter += 1
+            if counter > 1000:
+                raise ValueError('Timeout -- Cannot generate locations with given values.')
+
+            attempt = [random.uniform(-self.allowed_deg_from_fix, self.allowed_deg_from_fix)
+                       for _ in range(2)]
+
+            if self._too_close(attempt, locs):
+                continue
 
             if self.max_per_quad is not None:
-                if attempt[0] < 0.5 and attempt[1] < 0.5:
-                    quad = 0
-                elif attempt[0] >= 0.5 and attempt[1] < 0.5:
-                    quad = 1
-                elif attempt[0] < 0.5 and attempt[1] >= 0.5:
-                    quad = 2
-                else:
-                    quad = 3
+                quad = self._which_quad(attempt)
 
                 if quad_count[quad] < self.max_per_quad:
                     quad_count[quad] += 1
-                    grid.remove(grid_attempt)
                     locs.append(attempt)
             else:
-                grid.remove(grid_attempt)
                 locs.append(attempt)
 
         return locs
@@ -466,8 +454,6 @@ class Ktask(template.BaseExperiment):
 
         self.experiment_window.flip()
 
-        psychopy.core.wait(self.sample_time)
-
     def get_response(self):
         """Waits for a response from the participant. A helper function for self.run_trial.
 
@@ -499,14 +485,11 @@ class Ktask(template.BaseExperiment):
         trial_num -- The number of the trial within a block.
         """
 
-        coordinates = [[(num - .5) * self.allowed_deg_from_fix for num in loc]
-                       for loc in trial['locations']]
-
         self.display_fixation(self.iti_time)
-        self.display_stimuli(coordinates, trial['stim_colors'])
+        self.display_stimuli(trial['locations'], trial['stim_colors'])
         self.display_fixation(self.delay_time)
         self.display_test(
-            trial['trial_type'], coordinates, trial['stim_colors'],
+            trial['trial_type'], trial['locations'], trial['stim_colors'],
             trial['test_location'], trial['test_color'])
 
         resp, rt = self.get_response()
