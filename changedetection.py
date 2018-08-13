@@ -96,7 +96,7 @@ data_fields = [
     'Block',
     'Trial',
     'Timestamp',
-    'Condition',
+    'TrialType',
     'SetSize',
     'RT',
     'CRESP',
@@ -234,7 +234,7 @@ class Ktask(template.BaseExperiment):
             number_of_trials_per_block / len(set_sizes)) * percent_same)
 
         if self.same_trials_per_set_size % 1 != 0:
-            raise ValueError('Each condition needs a whole number of trials.')
+            raise ValueError('Each trial type needs a whole number of trials.')
         else:
             self.diff_trials_per_set_size = (
                 number_of_trials_per_block - self.same_trials_per_set_size)
@@ -344,17 +344,17 @@ class Ktask(template.BaseExperiment):
 
         return locs
 
-    def make_trial(self, set_size, condition):
+    def make_trial(self, set_size, trial_type):
         """Creates a single trial dict. A helper function for self.make_block.
 
         Returns the trial dict.
 
         Parameters:
         set_size -- The number of stimuli for this trial.
-        condition -- Whether this trial is same or different.
+        trial_type -- Whether this trial is same or different.
         """
 
-        if condition == 'same':
+        if trial_type == 'same':
             cresp = self.keys[0]
         else:
             cresp = self.keys[1]
@@ -378,7 +378,7 @@ class Ktask(template.BaseExperiment):
 
         trial = {
             'set_size': set_size,
-            'condition': condition,
+            'trial_type': trial_type,
             'cresp': cresp,
             'locations': locs,
             'stim_colors': stim_colors,
@@ -430,11 +430,11 @@ class Ktask(template.BaseExperiment):
 
         psychopy.core.wait(self.sample_time)
 
-    def display_test(self, condition, coordinates, colors, test_loc, test_color):
+    def display_test(self, trial_type, coordinates, colors, test_loc, test_color):
         """Displays the test array. A helper function for self.run_trial.
 
         Parameters:
-        condition -- Whether the trial is same or different.
+        trial_type -- Whether the trial is same or different.
         coordinates -- A list of coordinates where stimuli should be drawn.
         colors -- The colors that should be drawn at each coordinate.
         test_loc -- The index of the tested stimuli.
@@ -458,7 +458,7 @@ class Ktask(template.BaseExperiment):
                     units='deg').draw()
 
         # Draw over the test color on diff trials
-        if condition == 'diff':
+        if trial_type == 'diff':
             psychopy.visual.Rect(
                 self.experiment_window, width=self.stim_size,
                 height=self.stim_size, pos=coordinates[test_loc],
@@ -506,7 +506,7 @@ class Ktask(template.BaseExperiment):
         self.display_stimuli(coordinates, trial['stim_colors'])
         self.display_fixation(self.delay_time)
         self.display_test(
-            trial['condition'], coordinates, trial['stim_colors'],
+            trial['trial_type'], coordinates, trial['stim_colors'],
             trial['test_location'], trial['test_color'])
 
         resp, rt = self.get_response()
@@ -517,7 +517,7 @@ class Ktask(template.BaseExperiment):
             'Block': block_num,
             'Trial': trial_num,
             'Timestamp': psychopy.core.getAbsTime(),
-            'Condition': trial['condition'],
+            'TrialType': trial['trial_type'],
             'SetSize': trial['set_size'],
             'RT': rt,
             'CRESP': trial['cresp'],
