@@ -93,6 +93,7 @@ colors = [
 ]
 
 data_fields = [
+    'Subject',
     'Block',
     'Trial',
     'Timestamp',
@@ -524,6 +525,7 @@ class Ktask(template.BaseExperiment):
         acc = 1 if resp == trial['cresp'] else 0
 
         data = {
+            'Subject': self.experiment_info['Subject Number'],
             'Block': block_num,
             'Trial': trial_num,
             'Timestamp': psychopy.core.getAbsTime(),
