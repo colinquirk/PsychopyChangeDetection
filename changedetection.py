@@ -32,7 +32,7 @@ import itertools
 import numpy as np
 import psychopy
 
-import templateexperiments as template
+import template
 
 # Things you probably want to change
 number_of_trials_per_block = 10
