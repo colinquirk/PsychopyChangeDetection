@@ -26,6 +26,7 @@ import os
 import sys
 import errno
 
+import json
 import random
 import itertools
 
@@ -539,9 +540,9 @@ class Ktask(template.BaseExperiment):
             'RESP': resp,
             'ACC': acc,
             'LocationTested': trial['test_location'],
-            'Locations': trial['locations'],
-            'SampleColors': trial['stim_colors'],
-            'TestColors': trial['test_color'],
+            'Locations': json.dumps(trial['locations']),
+            'SampleColors': json.dumps(trial['stim_colors']),
+            'TestColors': json.dumps(trial['test_color']),
         }
 
         return data
