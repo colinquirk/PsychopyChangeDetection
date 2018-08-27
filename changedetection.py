@@ -30,7 +30,10 @@ import random
 import itertools
 
 import numpy as np
-import psychopy
+
+import psychopy.core
+import psychopy.event
+import psychopy.visual
 
 import template
 
