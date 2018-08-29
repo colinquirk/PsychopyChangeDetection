@@ -14,11 +14,11 @@ code or give the path to psychopy in the preferences.
 
 
 
-### Classes:
+### Classes
 * Ktask -- The class that runs the experiment.
     
 
-### Parameters:
+### Parameters
 * allowed_deg_from_fix -- The maximum distance in visual degrees the stimuli can appear from fixation
 * colors -- The list of colors (list of 3 values, -1 to 1) to be used in the experiment.
 * data_directory -- Where the data should be saved.
@@ -41,7 +41,7 @@ code or give the path to psychopy in the preferences.
 
 Additional keyword arguments are sent to template.BaseExperiment().
 
-### Methods:
+### Methods
 * chdir -- Changes the directory to where the data will be saved.
 * display_break -- Displays a screen during the break between blocks.
 * display_fixation -- Displays a fixation cross.
