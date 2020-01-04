@@ -241,7 +241,7 @@ class Ktask(template.BaseExperiment):
             self.diff_trials_per_set_size = (
                 number_of_trials_per_block - self.same_trials_per_set_size)
 
-        super(Ktask, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def chdir(self):
         """Changes the directory to where the data will be saved.
