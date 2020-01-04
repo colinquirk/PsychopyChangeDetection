@@ -19,16 +19,12 @@ Ktask -- The class that runs the experiment.
     See 'print Ktask.__doc__' for simple class docs or help(Ktask) for everything.
 """
 
-from __future__ import division
-from __future__ import print_function
-
 import os
 import sys
 import errno
 
 import json
 import random
-import itertools
 
 import numpy as np
 
@@ -430,7 +426,7 @@ class Ktask(template.BaseExperiment):
         psychopy.visual.TextStim(
             self.experiment_window, text='+', color=[-1, -1, -1]).draw()
 
-        for pos, color in itertools.izip(coordinates, colors):
+        for pos, color in zip(coordinates, colors):
             psychopy.visual.Rect(
                 self.experiment_window, height=self.stim_size,
                 width=self.stim_size, pos=pos, fillColor=color,
@@ -461,7 +457,7 @@ class Ktask(template.BaseExperiment):
                 fillColor=colors[test_loc], units='deg').draw()
 
         else:
-            for pos, color in itertools.izip(coordinates, colors):
+            for pos, color in zip(coordinates, colors):
                 psychopy.visual.Rect(
                     self.experiment_window, width=self.stim_size,
                     height=self.stim_size, pos=pos, fillColor=color,
