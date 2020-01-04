@@ -263,8 +263,6 @@ class Ktask(template.BaseExperiment):
 
         trial_list = []
 
-        self.same_trials_per_set_size
-
         for set_size in self.set_sizes:
             for _ in range(self.same_trials_per_set_size):
                 trial = self.make_trial(set_size, 'same')
