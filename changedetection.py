@@ -541,8 +541,29 @@ class Ktask(template.BaseExperiment):
 
         return data
 
-    def run(self):
-        """Runs the entire experiment if the file is run directly.
+    def run(self, setup_hook=None, before_first_trial_hook=None, pre_block_hook=None,
+            pre_trial_hook=None, post_trial_hook=None, post_block_hook=None,
+            end_experiment_hook=None):
+        """Runs the entire experiment.
+
+        This function takes a number of hooks that allow you to alter behavior of the experiment
+        without having to completely rewrite the run function. While large changes will still
+        require you to create a subclass, small changes like adding a practice block or
+        performance feedback screen can be implimented using these hooks. All hooks take in the
+        experiment object as the first argument. See below for other parameters sent to hooks.
+
+        Parameters:
+        setup_hook -- takes self, executed once the window is open.
+        before_first_trial_hook -- takes self, executed after instructions are displayed.
+        pre_block_hook -- takes self and the block list, executed immediately before block start.
+            Can optionally return an altered block list.
+        pre_trial_hook -- takes self and the trial dict, executed immediately before trial start.
+            Can optionally return an altered trial dict.
+        post_trial_hook -- takes self and the trial data, executed immediately after trial end.
+            Can optionally return altered trial data to be stored.
+        post_block_hook -- takes self, executed at end of block before break screen (including
+            last block).
+        end_experiment_hook -- takes self, executed immediately before end experiment screen.
         """
 
         self.chdir()
@@ -558,19 +579,48 @@ class Ktask(template.BaseExperiment):
         self.open_window(screen=0)
         self.display_text_screen('Loading...', wait_for_input=False)
 
+        if setup_hook is not None:
+            setup_hook(self)
+
         for instruction in self.instruct_text:
             self.display_text_screen(text=instruction)
 
+        if before_first_trial_hook is not None:
+            before_first_trial_hook(self)
+
         for block_num in range(self.number_of_blocks):
             block = self.make_block()
+
+            if pre_block_hook is not None:
+                tmp = pre_block_hook(self, block)
+                if tmp is not None:
+                    block = tmp
+
             for trial_num, trial in enumerate(block):
+                if pre_trial_hook is not None:
+                    tmp = pre_trial_hook(self, trial)
+                    if tmp is not None:
+                        trial = tmp
+
                 data = self.run_trial(trial, block_num, trial_num)
+
+                if post_trial_hook is not None:
+                    tmp = post_trial_hook(self, data)
+                    if tmp is not None:
+                        data = tmp
+
                 self.send_data(data)
 
             self.save_data_to_csv()
 
+            if post_block_hook is not None:
+                post_block_hook(self)
+
             if block_num + 1 != self.number_of_blocks:
                 self.display_break()
+
+        if end_experiment_hook is not None:
+            end_experiment_hook(self)
 
         self.display_text_screen(
             'The experiment is now over, please get your experimenter.',

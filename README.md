@@ -54,4 +54,44 @@ Additional keyword arguments are sent to template.BaseExperiment().
 * run_trial -- Runs a single trial.
 * run -- Runs the entire experiment.
 
+## Hooks
 
+Hooks can be sent to the `run` method in order to allow for small changes to be made without having to completely rewrite the run method in a subclass.
+
+#### Available Hooks
+
+- setup_hook -- takes self, executed once the window is open.
+- before_first_trial_hook -- takes self, executed after instructions are displayed.
+- pre_block_hook -- takes self and the block list, executed immediately before block start.
+    Can optionally return an altered block list.
+- pre_trial_hook -- takes self and the trial dict, executed immediately before trial start.
+    Can optionally return an altered trial dict.
+- post_trial_hook -- takes self and the trial data, executed immediately after trial end.
+    Can optionally return altered trial data to be stored.
+- post_block_hook -- takes self, executed at end of block before break screen (including
+    last block).
+- end_experiment_hook -- takes self, executed immediately before end experiment screen.
+
+#### Hook Example
+
+For example, if you wanted a block of practice trials, you could simply define a function:
+
+```
+# Arbitrary function name
+def my_before_first_trial_hook(self):
+    # Self refers to the experiment object
+    self.display_text_screen('We will now do a practice block.')
+    practice_block = self.make_block()
+    for trial_num, trial in enumerate(practice_block):
+        self.run_trial(trial, 'practice', trial_num)
+    self.display_break()
+    self.display_text_screen('Good job! We will now start the real trials.')
+```
+
+Then simply pass the hook into run.
+
+```
+exp.run(before_first_trial_hook=before_first_trial_hook)
+```
+
+Just like that, you have modified the experiment without having to change anything about the underlying implementation!
