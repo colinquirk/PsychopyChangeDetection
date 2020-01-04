@@ -91,7 +91,7 @@ def my_before_first_trial_hook(self):
 Then simply pass the hook into run.
 
 ```
-exp.run(before_first_trial_hook=before_first_trial_hook)
+exp.run(before_first_trial_hook=my_before_first_trial_hook)
 ```
 
 Just like that, you have modified the experiment without having to change anything about the underlying implementation!
