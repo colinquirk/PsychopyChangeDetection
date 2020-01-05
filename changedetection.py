@@ -555,9 +555,11 @@ class Ktask(template.BaseExperiment):
         Parameters:
         setup_hook -- takes self, executed once the window is open.
         before_first_trial_hook -- takes self, executed after instructions are displayed.
-        pre_block_hook -- takes self and the block list, executed immediately before block start.
+        pre_block_hook -- takes self, block list, and block num
+            Executed immediately before block start.
             Can optionally return an altered block list.
-        pre_trial_hook -- takes self and the trial dict, executed immediately before trial start.
+        pre_trial_hook -- takes self, trial dict, block num, and trial num
+            Executed immediately before trial start.
             Can optionally return an altered trial dict.
         post_trial_hook -- takes self and the trial data, executed immediately after trial end.
             Can optionally return altered trial data to be stored.
@@ -592,13 +594,13 @@ class Ktask(template.BaseExperiment):
             block = self.make_block()
 
             if pre_block_hook is not None:
-                tmp = pre_block_hook(self, block)
+                tmp = pre_block_hook(self, block, block_num)
                 if tmp is not None:
                     block = tmp
 
             for trial_num, trial in enumerate(block):
                 if pre_trial_hook is not None:
-                    tmp = pre_trial_hook(self, trial)
+                    tmp = pre_trial_hook(self, trial, block_num, trial_num)
                     if tmp is not None:
                         trial = tmp
 

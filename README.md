@@ -62,9 +62,12 @@ Hooks can be sent to the `run` method in order to allow for small changes to be 
 
 - setup_hook -- takes self, executed once the window is open.
 - before_first_trial_hook -- takes self, executed after instructions are displayed.
-- pre_block_hook -- takes self and the block list, executed immediately before block start.
+- pre_block_hook -- takes self, block list, and block num
+    Executed immediately before block start.
     Can optionally return an altered block list.
-- pre_trial_hook -- takes self and the trial dict, executed immediately before trial start.
+- pre_trial_hook -- takes self, trial dict, block num, and trial num
+    Executed immediately before trial start.
+    Can optionally return an altered trial dict.
     Can optionally return an altered trial dict.
 - post_trial_hook -- takes self and the trial data, executed immediately after trial end.
     Can optionally return altered trial data to be stored.
